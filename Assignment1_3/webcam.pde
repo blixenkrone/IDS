@@ -6,11 +6,12 @@ public class WebCam{
         for(int i = 0; i < camera.width; i++){
           color c = camera.pixels[(j*width)+i];
           if(brightness(c)>100){
-            stroke(c);
-            noSmooth();
-            point(i,j);
             pixels[(j*width)+i] = c;      
          }
+          if(keyCode == DOWN){
+            c = pixels[i]+color(255);
+            println("Hej!");
+          }
         }
        }
        updatePixels();
