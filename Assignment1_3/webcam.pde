@@ -1,5 +1,5 @@
 public class WebCam{
-  void webcamEffect(){
+  public void webcamEffect(){
      image(img,0,0,640,480);
      loadPixels();
        for(int j = 0; j < camera.height; j++){
@@ -7,14 +7,10 @@ public class WebCam{
           color c = camera.pixels[(j*width)+i];
           if(brightness(c)>100){
             pixels[(j*width)+i] = c;      
-         }
-          if(keyCode == DOWN){
-            c = pixels[i]+color(255);
-            println("Hej!");
           }
         }
        }
        updatePixels();
-    text(frameRate,30,30);
+    text(frameRate,30,30);    
  }
 }
