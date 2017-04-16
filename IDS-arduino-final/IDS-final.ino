@@ -7,17 +7,19 @@ int sensorReading = 0;
 int lockLedState = HIGH;
 
 //variabler til temperatur
+float voltRead;
 const int temperaturePin = A4;
 const int yellowPin =  11;
 int temperaturLedState = HIGH;
 unsigned long previousMillis = 0;
-int tempRead = 0;
+int voltInCelc = 0;
 
 //variabler til lyd
 int soundLedState = LOW;
+const int piezoSensor = A1;
 //knockSensor A1, noteA, noteB;
 
-char ON_OFF;
+boolean ON_OFF = false;
 
 void setup() {
   Serial.begin(9600);
@@ -33,27 +35,24 @@ void loop() {
   delay(500);
 }
 
-float getTemperature(int temperaturePin) {
+void getTemperature(int temperaturePin) {
   float voltRead = analogRead(temperaturePin);
   float volt = voltRead * (5.0 / 1023);
   float voltInCelc = (volt - 0.5) * 100;
-  Serial.println(voltInCelc);
-
-  if (voltInCelc >= 25 || voltInCelc <= 1) { //Til tests er det 24 - normalt køleskab er måske maks 7 *c.
-    ON_OFF = 'A';
-    temperaturAlarm(50);
-    piezoSound();
+  
+  Serial.write((int) voltInCelc); //Send til processing
+  if (voltInCelc >= 23 || voltInCelc <= 1) { //Til tests er det 24 - normalt køleskab er måske maks 7 *c.
+    ON_OFF = true;
   } else {
-    getTemperature(temperaturePin);
-    ON_OFF = 'B';
-    Serial.print("Reset");
+    ON_OFF = false;
   }
-  return voltInCelc;
+  temperaturAlarm(50);
+  piezoSound();
 }
 
 void temperaturAlarm(int interval) {
   unsigned long currentMillis = millis();
-  if (ON_OFF = 'A') {
+  if (ON_OFF == true) {
     if (currentMillis - previousMillis >= interval) {
       previousMillis = currentMillis;
 
@@ -66,39 +65,32 @@ void temperaturAlarm(int interval) {
       }
       digitalWrite(yellowPin, temperaturLedState);
     }
+  } else {
+    noTone(piezoSensor); 
   }
 }
 
 void piezoSound() {
-  if (ON_OFF = 'A') {
+  if (ON_OFF == true) {
     const int noteA = 440;
     const int noteB = 750;
     if (soundLedState == LOW) {
-      tone(knockSensor, noteA);
+      tone(piezoSensor, noteA);
     } else if (soundLedState == HIGH) {
-      tone(knockSensor, noteB);
+      tone(piezoSensor, noteB);
     }
   }
 }
 
 void lockSensor() {
-  Serial.print(sensorReading);
 
-  //  if (ON_OFF = 'B') {
-  if (sensorReading >= threshold) {
-    lockLedState = !lockLedState;
-    digitalWrite(greenPin, lockLedState);
-  } else {
-    digitalWrite(redPin, !lockLedState);
-    delay(200);
-    //    }
+  if (ON_OFF == false) {
+    if (sensorReading >= threshold) {
+      lockLedState = !lockLedState;
+      digitalWrite(greenPin, lockLedState);
+    } else {
+      digitalWrite(redPin, !lockLedState);
+      delay(200);
+    }
   }
 }
-
-
-
-//LAV EN LAMPE DER KAN JUSTERE LYSSTYRKE FRA DREJEKNAP
-//ENTEN BOOLEAN ELLER SEND TIL PROCESSING ELLER GOTO
-//FRITZING
-
-//MANGLER: LockSensor virker ikke ordenligt.
