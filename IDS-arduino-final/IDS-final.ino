@@ -19,7 +19,7 @@ int soundLedState = LOW;
 const int piezoSensor = A1;
 //knockSensor A1, noteA, noteB;
 
-boolean ON_OFF = false;
+int alarmState = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -42,17 +42,17 @@ void getTemperature(int temperaturePin) {
   
   Serial.write((int) voltInCelc); //Send til processing
   if (voltInCelc >= 23 || voltInCelc <= 1) { //Til tests er det 24 - normalt køleskab er måske maks 7 *c.
-    ON_OFF = true;
+    alarmState = 1;
   } else {
-    ON_OFF = false;
+    alarmState = 0;
   }
-  temperaturAlarm(50);
+  temperaturAlarm(5000);
   piezoSound();
 }
 
 void temperaturAlarm(int interval) {
   unsigned long currentMillis = millis();
-  if (ON_OFF == true) {
+  if (alarmState == 1) {
     if (currentMillis - previousMillis >= interval) {
       previousMillis = currentMillis;
 
@@ -71,7 +71,7 @@ void temperaturAlarm(int interval) {
 }
 
 void piezoSound() {
-  if (ON_OFF == true) {
+  if (alarmState == 1) {
     const int noteA = 440;
     const int noteB = 750;
     if (soundLedState == LOW) {
@@ -84,7 +84,7 @@ void piezoSound() {
 
 void lockSensor() {
 
-  if (ON_OFF == false) {
+  if (alarmState) {
     if (sensorReading >= threshold) {
       lockLedState = !lockLedState;
       digitalWrite(greenPin, lockLedState);
